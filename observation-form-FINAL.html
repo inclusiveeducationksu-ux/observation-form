@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INED Observation Summary Form</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a4d6d;
+            --primary-dark: #0f2e42;
+            --accent: #d97706;
+            --accent-light: #fbbf24;
+            --bg-main: #fafaf9;
+            --bg-card: #ffffff;
+            --text-primary: #1c1917;
+            --text-secondary: #57534e;
+            --border: #e7e5e4;
+            --border-focus: #d97706;
+            --success: #16a34a;
+            --warning: #eab308;
+            --error: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(26, 77, 109, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .required {
+            color: var(--error);
+            margin-left: 0.25rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .radio-option:hover {
+            border-color: var(--accent);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 0.5rem;
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: var(--accent);
+            background: rgba(217, 119, 6, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .checkbox-option:hover {
+            border-color: var(--accent);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .performance-indicators {
+            background: rgba(217, 119, 6, 0.05);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .performance-indicators h4 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .performance-indicators ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .performance-indicators li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .performance-indicators li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .rating-scale {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .rating-button {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .rating-button:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .rating-button.selected {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .rating-button.ineffective.selected {
+            background: var(--error);
+            border-color: var(--error);
+        }
+
+        .rating-button.needs-development.selected {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .rating-button.proficient.selected {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(22, 163, 74, 0.3);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: rgba(22, 163, 74, 0.1);
+            border-left: 4px solid var(--success);
+            color: #15803d;
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .rating-scale {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .summary-item {
+            background: rgba(217, 119, 6, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .summary-item strong {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .complete-checkmark {
+            color: var(--success);
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const ObservationForm = () => {
+            const [currentSection, setCurrentSection] = useState(0);
+            const [formData, setFormData] = useState({
+                // Basic Information
+                observationDate: '',
+                yceLevel: '',
+                candidateName: '',
+                supervisorName: '',
+                cooperatingTeacherName: '',
+                school: '',
+                district: '',
+                grades: [],
+                classroomSetting: [],
+                subject: '',
+                personCompleting: '',
+                observationNumber: '',
+
+                // Planning Standards
+                planning_std2_rating: '',
+                planning_std2_evidence: '',
+                planning_std4_rating: '',
+                planning_std4_evidence: '',
+                planning_std5_rating: '',
+                planning_std5_evidence: '',
+                planning_std6_rating: '',
+                planning_std6_evidence: '',
+                planning_std11_rating: '',
+                planning_std11_evidence: '',
+                planning_std11a: '',
+                planning_std11b: '',
+                planning_std11c: '',
+                planning_std13_rating: '',
+                planning_std13_evidence: '',
+
+                // Instruction Standards
+                instruction_std1_rating: '',
+                instruction_std1_evidence: '',
+                instruction_std3_rating: '',
+                instruction_std3_evidence: '',
+                instruction_std4_rating: '',
+                instruction_std4_evidence: '',
+                instruction_std5_rating: '',
+                instruction_std5_evidence: '',
+                instruction_std6_rating: '',
+                instruction_std6_evidence: '',
+                instruction_std7_rating: '',
+                instruction_std7_evidence: '',
+                instruction_std8_rating: '',
+                instruction_std8_evidence: '',
+                instruction_std9_rating: '',
+                instruction_std9_evidence: '',
+                instruction_std10_rating: '',
+                instruction_std10_evidence: '',
+                instruction_std11_rating: '',
+                instruction_std11_evidence: '',
+                instruction_std11a: '',
+                instruction_std11b: '',
+                instruction_std11c: '',
+                instruction_std12_rating: '',
+                instruction_std12_evidence: '',
+                instruction_std13_rating: '',
+                instruction_std13_evidence: '',
+
+                // Notes
+                observationNotes: ''
+            });
+
+            const sections = [
+                'Basic Information',
+                'Planning Standards (Part I)',
+                'Instruction Standards (Part II)',
+                'Observation Notes'
+            ];
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handleMultiSelect = (field, value) => {
+                setFormData(prev => {
+                    const current = prev[field] || [];
+                    if (current.includes(value)) {
+                        return { ...prev, [field]: current.filter(v => v !== value) };
+                    }
+                    return { ...prev, [field]: [...current, value] };
+                });
+            };
+
+            const calculateProgress = () => {
+                const totalFields = Object.keys(formData).length;
+                const filledFields = Object.values(formData).filter(val => {
+                    if (Array.isArray(val)) return val.length > 0;
+                    return val !== '';
+                }).length;
+                return Math.round((filledFields / totalFields) * 100);
+            };
+
+            const handleSubmit = () => {
+                const jsonData = JSON.stringify(formData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `observation-form-${formData.candidateName || 'draft'}-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                alert('Form data has been downloaded!');
+            };
+
+            const getRatingScore = (rating) => {
+                if (rating === 'L-1: Ineffective') return 1;
+                if (rating === 'L-2: Needs Development') return 2;
+                if (rating === 'L-3: Proficient') return 3;
+                return 0;
+            };
+
+            const generateHTMLReport = () => {
+                const standards = [
+                    { id: 'planning_std2', name: 'Standard 2: Instructional Planning', description: 'The teacher candidate used state and local school district curricula and standards, effective strategies, resources, and data to address the needs of all students in their lesson plan.' },
+                    { id: 'planning_std4', name: 'Standard 4: Differentiated Instruction (Planning)', description: 'The teacher candidate challenges and supports each student\'s learning by providing appropriate content and developing skills that address individual learning differences.' },
+                    { id: 'planning_std5', name: 'Standard 5: Assessment Strategies (Planning)', description: 'The teacher candidate systematically chooses a variety of diagnostic, formative, and summative assessment strategies.' },
+                    { id: 'planning_std6', name: 'Standard 6: Assessment Uses (Planning)', description: 'The teacher candidate systematically gathers, analyzes, and uses relevant data.' },
+                    { id: 'planning_std11', name: 'Standard 11: Technology (Planning)', description: 'The teacher candidate demonstrates technology proficiency, technology integration, and competency in blended/online learning.' },
+                    { id: 'planning_std13', name: 'Standard 13: Disciplinary Literacy (Planning)', description: 'The teacher candidate demonstrates skill in integrating content area literacy strategies.' },
+                    { id: 'instruction_std1', name: 'Standard 1: Professional Knowledge', description: 'The teacher candidate demonstrates an understanding of the curriculum, subject content, and pedagogical knowledge.' },
+                    { id: 'instruction_std3', name: 'Standard 3: Instructional Strategies', description: 'The teacher candidate promotes learning by using research-based instructional strategies.' },
+                    { id: 'instruction_std4', name: 'Standard 4: Differentiated Instruction (Instruction)', description: 'The teacher candidate challenges and supports each student\'s learning.' },
+                    { id: 'instruction_std5', name: 'Standard 5: Assessment Strategies (Instruction)', description: 'The teacher candidate systematically chooses assessment strategies.' },
+                    { id: 'instruction_std6', name: 'Standard 6: Assessment Uses (Instruction)', description: 'The teacher candidate uses data to inform instruction.' },
+                    { id: 'instruction_std7', name: 'Standard 7: Positive Learning Environment', description: 'The teacher candidate provides a well-managed, safe, and orderly environment.' },
+                    { id: 'instruction_std8', name: 'Standard 8: Academically Challenging Environment', description: 'The teacher candidate creates a student-centered academic environment.' },
+                    { id: 'instruction_std9', name: 'Standard 9: Professionalism', description: 'The teacher candidate exhibits a commitment to professional ethics.' },
+                    { id: 'instruction_std10', name: 'Standard 10: Communication', description: 'The teacher candidate communicates effectively with stakeholders.' },
+                    { id: 'instruction_std11', name: 'Standard 11: Technology (Instruction)', description: 'The teacher candidate demonstrates technology proficiency in instruction.' },
+                    { id: 'instruction_std12', name: 'Standard 12: Literacy Support Services', description: 'The teacher candidate uses data for literacy support and intervention.' },
+                    { id: 'instruction_std13', name: 'Standard 13: Disciplinary Literacy (Instruction)', description: 'The teacher candidate integrates literacy strategies during instruction.' }
+                ];
+
+                const scoredStandards = standards.map(std => ({
+                    ...std,
+                    rating: formData[`${std.id}_rating`] || 'Not rated',
+                    score: getRatingScore(formData[`${std.id}_rating`]),
+                    evidence: formData[`${std.id}_evidence`] || 'No evidence provided'
+                })).filter(std => std.score > 0);
+
+                const strengths = scoredStandards.filter(std => std.score === 3);
+                const areasForImprovement = scoredStandards.filter(std => std.score < 3);
+
+                const generateRecommendation = (std) => {
+                    if (std.id.includes('planning') && std.id.includes('std2')) {
+                        return 'Review lesson planning strategies and incorporate more detailed planning elements. Ensure alignment with state and district curricula.';
+                    } else if (std.id.includes('differentiat')) {
+                        return 'Focus on differentiating instruction to meet diverse student needs. Consider varied instructional approaches for different learning styles.';
+                    } else if (std.id.includes('assessment')) {
+                        return 'Strengthen assessment practices and use of data to inform instruction. Implement more formative assessments during lessons.';
+                    } else if (std.id.includes('technology')) {
+                        return 'Increase integration of technology tools in teaching and learning. Explore digital resources that enhance student engagement.';
+                    } else if (std.id.includes('literacy')) {
+                        return 'Enhance incorporation of literacy strategies across content areas. Explicitly teach vocabulary and reading comprehension skills.';
+                    } else if (std.id.includes('environment') || std.id.includes('std7')) {
+                        return 'Continue developing classroom management and learning environment strategies. Establish clear routines and expectations.';
+                    } else if (std.id.includes('std8')) {
+                        return 'Increase academic rigor and provide more opportunities for critical thinking. Encourage students to take intellectual risks.';
+                    } else if (std.id.includes('communication') || std.id.includes('std10')) {
+                        return 'Strengthen communication skills with students and stakeholders. Practice clear explanations and active listening.';
+                    } else {
+                        return 'Seek additional support and professional development in this area. Collaborate with mentor teachers and attend relevant workshops.';
+                    }
+                };
+
+                const reportHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INED Observation Report - ${formData.candidateName || 'Candidate'}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Source Sans 3', Arial, sans-serif; line-height: 1.6; color: #1c1917; background: #ffffff; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+        @media print { body { padding: 0; } .no-print { display: none; } }
+        .header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 3px solid #1a4d6d; }
+        .header h1 { color: #1a4d6d; font-size: 2rem; margin-bottom: 0.5rem; }
+        .header .subtitle { color: #57534e; font-size: 1rem; }
+        .section { margin-bottom: 2.5rem; }
+        .section-title { color: #1a4d6d; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #d97706; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .info-item { padding: 0.75rem; background: #f9fafb; border-left: 3px solid #d97706; border-radius: 4px; }
+        .info-item strong { color: #1a4d6d; display: block; margin-bottom: 0.25rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        thead { background: #1a4d6d; color: white; }
+        th { padding: 1rem; text-align: left; font-weight: 600; }
+        td { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        tr.proficient { background-color: #d1fae5; }
+        tr.needs-development { background-color: #fef3c7; }
+        .standard-name { font-weight: 600; color: #1a4d6d; margin-bottom: 0.25rem; }
+        .standard-desc { font-size: 0.9rem; color: #57534e; font-style: italic; }
+        .score { font-weight: 700; text-align: center; }
+        ul { margin-left: 2rem; margin-top: 0.5rem; }
+        li { margin-bottom: 0.75rem; }
+        .no-items { font-style: italic; color: #6b7280; padding: 1rem; background: #f9fafb; border-radius: 4px; }
+        .button-group { margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; }
+        .btn { padding: 0.875rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background: #d97706; color: white; }
+        .btn-primary:hover { background: #b45309; }
+        .btn-secondary { background: white; color: #1a4d6d; border: 2px solid #1a4d6d; }
+        .btn-secondary:hover { background: #1a4d6d; color: white; }
+        .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INED Observation Summary Report</h1>
+        <p class="subtitle">Professional Teacher Candidate Evaluation</p>
+        <p class="subtitle">Generated: ${new Date().toLocaleDateString()}</p>
+    </div>
+    <div class="section">
+        <h2 class="section-title">Candidate Information</h2>
+        <div class="info-grid">
+            <div class="info-item"><strong>Candidate Name:</strong>${formData.candidateName || 'Not provided'}</div>
+            <div class="info-item"><strong>University Supervisor:</strong>${formData.supervisorName || 'Not provided'}</div>
+            <div class="info-item"><strong>Cooperating Teacher:</strong>${formData.cooperatingTeacherName || 'Not provided'}</div>
+            <div class="info-item"><strong>School:</strong>${formData.school || 'Not provided'}</div>
+            <div class="info-item"><strong>District:</strong>${formData.district || 'Not provided'}</div>
+            <div class="info-item"><strong>Grade(s):</strong>${formData.grades?.join(', ') || 'Not provided'}</div>
+            <div class="info-item"><strong>Subject:</strong>${formData.subject || 'Not provided'}</div>
+            <div class="info-item"><strong>Observation Date:</strong>${formData.observationDate || 'Not provided'}</div>
+            <div class="info-item"><strong>YCE Level:</strong>${formData.yceLevel || 'Not provided'}</div>
+            <div class="info-item"><strong>Observation Number:</strong>${formData.observationNumber || 'Not provided'}</div>
+        </div>
+    </div>
+    <div class="section">
+        <h2 class="section-title">Standards Assessment</h2>
+        <p style="margin-bottom: 1rem; color: #57534e;"><strong>Color Key:</strong> <span style="background: #d1fae5; padding: 2px 8px; border-radius: 4px;">Green = L-3: Proficient</span><span style="background: #fef3c7; padding: 2px 8px; border-radius: 4px; margin-left: 0.5rem;">Yellow = L-2: Needs Development or L-1: Ineffective</span></p>
+        <table><thead><tr><th style="width: 35%;">Standard</th><th style="width: 15%;">Score</th><th style="width: 50%;">Detailed Evidence</th></tr></thead><tbody>
+                ${scoredStandards.map(std => `<tr class="${std.score === 3 ? 'proficient' : 'needs-development'}"><td><div class="standard-name">${std.name}</div><div class="standard-desc">${std.description}</div></td><td class="score">${std.rating}</td><td>${std.evidence}</td></tr>`).join('')}
+        </tbody></table>
+    </div>
+    <div class="section">
+        <h2 class="section-title">Observation Summary</h2>
+        <h3 style="color: #16a34a; margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.25rem;">Strengths</h3>
+        ${strengths.length > 0 ? `<ul>${strengths.map(std => `<li><strong>${std.name}:</strong> Demonstrated proficiency in this area.</li>`).join('')}</ul>` : '<p class="no-items">No standards rated as Proficient (L-3) at this time.</p>'}
+        <h3 style="color: #eab308; margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.25rem;">Areas for Improvement</h3>
+        ${areasForImprovement.length > 0 ? `<ul>${areasForImprovement.map(std => `<li><strong>${std.name}:</strong> ${std.score === 1 ? 'Requires significant development' : 'Needs continued development'}.</li>`).join('')}</ul>` : '<p class="no-items">All evaluated standards show proficiency.</p>'}
+        <h3 style="color: #d97706; margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.25rem;">Recommendations</h3>
+        ${areasForImprovement.length > 0 ? `<p style="margin-bottom: 1rem;">Based on the observation, the following recommendations are provided:</p><ul>${areasForImprovement.map(std => `<li><strong>${std.name}:</strong> ${generateRecommendation(std)}</li>`).join('')}</ul><p style="margin-top: 1rem; font-style: italic; color: #57534e;">Schedule follow-up observations and provide targeted support in areas needing development.</p>` : '<p class="no-items">Continue to maintain high performance across all evaluated standards.</p>'}
+    </div>
+    ${formData.observationNotes ? `<div class="section"><h2 class="section-title">Observation Notes</h2><p style="white-space: pre-wrap; padding: 1rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid #d97706;">${formData.observationNotes}</p></div>` : ''}
+    <div class="button-group no-print">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+        <button class="btn btn-secondary" onclick="window.close()">Close Window</button>
+    </div>
+    <div class="footer"><p>INED Observation Summary Report</p><p>Kennesaw State University - Inclusive Education Department</p><p>Generated: ${new Date().toLocaleString()}</p></div>
+</body>
+</html>`;
+
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(reportHTML);
+                reportWindow.document.close();
+                alert('HTML Report generated! The report has opened in a new window. You can print it or save as PDF from your browser (Ctrl+P or Cmd+P).');
+            };
+
+            const nextSection = () => {
+                if (currentSection < sections.length - 1) {
+                    setCurrentSection(currentSection + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+
+            const prevSection = () => {
+                if (currentSection > 0) {
+                    setCurrentSection(currentSection - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+
+            const RatingScale = ({ value, onChange, field }) => (
+                <div className="rating-scale">
+                    <div 
+                        className={`rating-button ineffective ${value === 'L-1: Ineffective' ? 'selected' : ''}`}
+                        onClick={() => onChange(field, 'L-1: Ineffective')}
+                    >
+                        L-1: Ineffective
+                    </div>
+                    <div 
+                        className={`rating-button needs-development ${value === 'L-2: Needs Development' ? 'selected' : ''}`}
+                        onClick={() => onChange(field, 'L-2: Needs Development')}
+                    >
+                        L-2: Needs Development
+                    </div>
+                    <div 
+                        className={`rating-button proficient ${value === 'L-3: Proficient' ? 'selected' : ''}`}
+                        onClick={() => onChange(field, 'L-3: Proficient')}
+                    >
+                        L-3: Proficient
+                    </div>
+                </div>
+            );
+
+            const EvidenceOptions = ({ value, onChange, field }) => (
+                <div className="radio-group">
+                    <label className={`radio-option ${value === 'Evidence (E)' ? 'selected' : ''}`}>
+                        <input 
+                            type="radio" 
+                            checked={value === 'Evidence (E)'}
+                            onChange={() => onChange(field, 'Evidence (E)')}
+                        />
+                        Evidence (E)
+                    </label>
+                    <label className={`radio-option ${value === 'Non-Evidence (NE)' ? 'selected' : ''}`}>
+                        <input 
+                            type="radio" 
+                            checked={value === 'Non-Evidence (NE)'}
+                            onChange={() => onChange(field, 'Non-Evidence (NE)')}
+                        />
+                        Non-Evidence (NE)
+                    </label>
+                    <label className={`radio-option ${value === 'Other' ? 'selected' : ''}`}>
+                        <input 
+                            type="radio" 
+                            checked={value === 'Other'}
+                            onChange={() => onChange(field, 'Other')}
+                        />
+                        Other
+                    </label>
+                </div>
+            );
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>INED Observation Summary Form</h1>
+                        <p>Generate professional HTML reports instantly - No installation required!</p>
+                    </div>
+
+                    <div className="progress-bar">
+                        <div className="progress-track">
+                            <div 
+                                className="progress-fill" 
+                                style={{ width: `${calculateProgress()}%` }}
+                            />
+                        </div>
+                        <div className="progress-text">
+                            <span>{sections[currentSection]}</span>
+                            <span>{calculateProgress()}% Complete</span>
+                        </div>
+                    </div>
+
+                    {currentSection === 0 && (
+                        <div className="form-card">
+                            <h2 className="section-title">Basic Information</h2>
+                            
+                            <div className="alert alert-info">
+                                <span>ℹ️</span>
+                                <div>
+                                    <strong>Assessment Purpose:</strong> The Observation Summary is a formative assessment based on Georgia CAPS.
+                                    Complete this form using evidence from pre-conference, lesson plan, observation, and post-conference.
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Date of Observation <span className="required">*</span></label>
+                                <input 
+                                    type="date"
+                                    className="form-input"
+                                    value={formData.observationDate}
+                                    onChange={(e) => handleInputChange('observationDate', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">YCE Level <span className="required">*</span></label>
+                                <div className="radio-group">
+                                    {['YCE I', 'YCE II', 'Other'].map(option => (
+                                        <label key={option} className={`radio-option ${formData.yceLevel === option ? 'selected' : ''}`}>
+                                            <input 
+                                                type="radio"
+                                                checked={formData.yceLevel === option}
+                                                onChange={() => handleInputChange('yceLevel', option)}
+                                            />
+                                            {option}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Candidate's Name <span className="required">*</span></label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.candidateName}
+                                    onChange={(e) => handleInputChange('candidateName', e.target.value)}
+                                    placeholder="Enter candidate's full name"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">University Supervisor's Name <span className="required">*</span></label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.supervisorName}
+                                    onChange={(e) => handleInputChange('supervisorName', e.target.value)}
+                                    placeholder="Enter supervisor's full name"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Cooperating Teacher's Name <span className="required">*</span></label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.cooperatingTeacherName}
+                                    onChange={(e) => handleInputChange('cooperatingTeacherName', e.target.value)}
+                                    placeholder="Enter cooperating teacher's full name"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">School <span className="required">*</span></label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.school}
+                                    onChange={(e) => handleInputChange('school', e.target.value)}
+                                    placeholder="Enter school name"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">District <span className="required">*</span></label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.district}
+                                    onChange={(e) => handleInputChange('district', e.target.value)}
+                                    placeholder="Enter school district"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Grade(s) <span className="required">*</span></label>
+                                <p className="help-text">Select all that apply</p>
+                                <div className="checkbox-group">
+                                    {['PreK', 'Kindergarten', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', 
+                                      '5th Grade', '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade', 
+                                      '11th Grade', '12th Grade'].map(grade => (
+                                        <label key={grade} className="checkbox-option">
+                                            <input 
+                                                type="checkbox"
+                                                checked={formData.grades.includes(grade)}
+                                                onChange={() => handleMultiSelect('grades', grade)}
+                                            />
+                                            {grade}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Classroom Setting</label>
+                                <p className="help-text">Select all that apply</p>
+                                <div className="checkbox-group">
+                                    {['General Education', 'Inclusive/IRR', 'Resource Room', 'Self-contained classroom', 
+                                      'Home/hospital', 'Other'].map(setting => (
+                                        <label key={setting} className="checkbox-option">
+                                            <input 
+                                                type="checkbox"
+                                                checked={formData.classroomSetting.includes(setting)}
+                                                onChange={() => handleMultiSelect('classroomSetting', setting)}
+                                            />
+                                            {setting}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Subject <span className="required">*</span></label>
+                                <select 
+                                    className="form-select"
+                                    value={formData.subject}
+                                    onChange={(e) => handleInputChange('subject', e.target.value)}
+                                >
+                                    <option value="">Select a subject</option>
+                                    <option value="English Language Arts">English Language Arts</option>
+                                    <option value="Math">Math</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Social Studies">Social Studies</option>
+                                    <option value="Literacy/Reading">Literacy/Reading</option>
+                                    <option value="Special (art, music, PE)">Special (art, music, PE)</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Person Completing Form <span className="required">*</span></label>
+                                <div className="radio-group">
+                                    {['Cooperating Teacher', 'Supervisor', 'Candidate', 'Other'].map(person => (
+                                        <label key={person} className={`radio-option ${formData.personCompleting === person ? 'selected' : ''}`}>
+                                            <input 
+                                                type="radio"
+                                                checked={formData.personCompleting === person}
+                                                onChange={() => handleInputChange('personCompleting', person)}
+                                            />
+                                            {person}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Observation Number <span className="required">*</span></label>
+                                <div className="radio-group">
+                                    {['Observation #1', 'Observation #2', 'Observation #3', 'Other'].map(num => (
+                                        <label key={num} className={`radio-option ${formData.observationNumber === num ? 'selected' : ''}`}>
+                                            <input 
+                                                type="radio"
+                                                checked={formData.observationNumber === num}
+                                                onChange={() => handleInputChange('observationNumber', num)}
+                                            />
+                                            {num}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {currentSection === 1 && (
+                        <div>
+                            <div className="form-card">
+                                <h2 className="section-title">Planning Standards - Part I</h2>
+                                
+                                <div className="alert alert-info">
+                                    <span>📋</span>
+                                    <div>These standards evaluate the candidate's lesson planning abilities. Provide ratings and specific evidence for each standard.</div>
+                                </div>
+
+                                {/* Standard 2: Instructional Planning */}
+                                <div style={{marginTop: '2rem'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 2: Instructional Planning</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate used state and local school district curricula and standards, effective strategies, resources, and data to address the needs of all students in their lesson plan.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Analyzes and uses student learning data to inform planning</li>
+                                            <li>Develops plans that are clear, logical, sequential, and integrated across the curriculum</li>
+                                            <li>Plans instruction effectively for content mastery, pacing, and transitions</li>
+                                            <li>Plans for instruction to meet the needs of all students</li>
+                                            <li>Aligns & connects lesson objectives to state & local school district curricula & standards, and student learning needs</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.planning_std2_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std2_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 2 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std2_evidence}
+                                            onChange={(e) => handleInputChange('planning_std2_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 4: Differentiated Instruction */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 4: Differentiated Instruction</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate challenges and supports each student's learning by providing appropriate content and developing skills that address individual learning differences.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Differentiates instructional content, process, product, & learning environment to meet individual developmental needs</li>
+                                            <li>Provides remediation, enrichment, and acceleration to further student understanding of material</li>
+                                            <li>Uses diagnostic, formative, & summative assessment data to inform instructional modifications for individual students</li>
+                                            <li>Develops critical and creative thinking by providing activities at the appropriate level of challenge for students</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.planning_std4_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std4_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 4 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std4_evidence}
+                                            onChange={(e) => handleInputChange('planning_std4_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 5: Assessment Strategies */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 5: Assessment Strategies</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate systematically chooses a variety of diagnostic, formative, and summative assessment strategies and instruments that are valid and appropriate for the content and student population.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Uses assessment techniques that are appropriate for the developmental level of students</li>
+                                            <li>Involves students in setting learning goals and monitoring their own progress</li>
+                                            <li>Uses formal and informal assessments for diagnostic, formative, and summative purposes</li>
+                                            <li>Uses grading practices that report final mastery in relationship to content goals and objectives</li>
+                                            <li>Collaborates with others to develop common assessments, when appropriate</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.planning_std5_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std5_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 5 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std5_evidence}
+                                            onChange={(e) => handleInputChange('planning_std5_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 6: Assessment Uses */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 6: Assessment Uses</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate systematically gathers, analyzes, and uses relevant data to measure student progress, to inform instructional content and delivery methods, and to provide timely and constructive feedback to both students and parents.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Provides constructive and frequent feedback to students on their progress toward their learning goals</li>
+                                            <li>Teaches students how to self-assess and to use metacognitive strategies in support of lifelong learning</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.planning_std6_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std6_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 6 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std6_evidence}
+                                            onChange={(e) => handleInputChange('planning_std6_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 11: Technology */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 11: Technology</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate demonstrates technology proficiency, technology integration, and competency in blended/online learning during field and clinical experiences.</p>
+
+                                    <RatingScale 
+                                        value={formData.planning_std11_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std11_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 11 (one score for 11A-11C) <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std11_evidence}
+                                            onChange={(e) => handleInputChange('planning_std11_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11A: Technology Proficiency</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate explores and uses a variety of current and emerging technologies to support learning.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Uses a variety of devices, apps, software, and the Internet in the classroom</li>
+                                                <li>Troubleshoots and solves minor tech issues (or accesses support)</li>
+                                                <li>Answers technology-related questions from learners in the classroom</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.planning_std11a}
+                                            onChange={handleInputChange}
+                                            field="planning_std11a"
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11B: Technology Integration</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate demonstrates the ability to integrate technology into standards-based teaching, learning, and assessment.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Facilitates learner use of technology for critical thinking, problem solving, creativity, and authentic learning</li>
+                                                <li>Uses technology to facilitate communication and collaboration with learners, families, colleagues and the larger community</li>
+                                                <li>Uses technology to personalize learning around learner strengths, interests, and needs</li>
+                                                <li>Uses technology to implement assessments and track student performance data</li>
+                                                <li>Manages the use of technology in the classroom, ensures safe, legal, and ethical use</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.planning_std11b}
+                                            onChange={handleInputChange}
+                                            field="planning_std11b"
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11C: Blended/Online Learning</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate demonstrates the specialized knowledge and skills necessary for teaching and learning in a blended/online learning environment.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Develops or curates online content and instruction for students</li>
+                                                <li>Facilitates student learning both face-to-face and online</li>
+                                                <li>Delivers content through a learning management system or online digital platform</li>
+                                                <li>Leverages technology tools so students can learn anywhere, anytime</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.planning_std11c}
+                                            onChange={handleInputChange}
+                                            field="planning_std11c"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 13: Disciplinary Literacy */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 13: Disciplinary Literacy</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate demonstrates skill in integrating a range of content area literacy strategies into specific disciplinary subject areas, including academic vocabulary, writing, and interpretation of informational text.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Integrates a range of content area literacy strategies into specific disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates academic vocabulary in disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates writing strategies into disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates evidence-based strategies for interpreting informational text</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.planning_std13_rating}
+                                        onChange={handleInputChange}
+                                        field="planning_std13_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 13 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.planning_std13_evidence}
+                                            onChange={(e) => handleInputChange('planning_std13_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {currentSection === 2 && (
+                        <div>
+                            <div className="form-card">
+                                <h2 className="section-title">Instruction Standards - Part II</h2>
+                                
+                                <div className="alert alert-info">
+                                    <span>👨‍🏫</span>
+                                    <div>These standards evaluate the candidate's instructional implementation. Provide ratings and specific evidence for each standard.</div>
+                                </div>
+
+                                {/* Standard 1: Professional Knowledge */}
+                                <div style={{marginTop: '2rem'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 1: Professional Knowledge</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate demonstrates an understanding of the curriculum, subject content, pedagogical knowledge, and the needs of students by providing relevant learning experiences.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Addresses appropriate curriculum standards and integrates key content elements</li>
+                                            <li>Facilitates students' use of higher-level thinking skills in instruction</li>
+                                            <li>Demonstrates ability to link present content with past and future learning experiences</li>
+                                            <li>Demonstrates accurate, deep, and current knowledge of subject matter</li>
+                                            <li>Exhibits pedagogical skills relevant to the subject area(s) taught</li>
+                                            <li>Bases instruction on goals that reflect high expectations for all students</li>
+                                            <li>Displays an understanding of the intellectual, social, emotional, and physical development of the age group</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std1_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std1_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 1 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std1_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std1_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 3: Instructional Strategies */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 3: Instructional Strategies</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate promotes learning by using research-based instructional strategies relevant to the content to engage students in active learning and to facilitate the students' acquisition of key knowledge and skills.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Builds upon students' existing knowledge and skills</li>
+                                            <li>Reinforces learning goals consistently throughout the lesson</li>
+                                            <li>Uses a variety of research-based instructional strategies and resources</li>
+                                            <li>Effectively uses appropriate instructional technology to enhance student learning</li>
+                                            <li>Communicates and presents material clearly, and checks for understanding</li>
+                                            <li>Develops higher-order thinking through questioning and problem-solving activities</li>
+                                            <li>Engages students in authentic learning by providing real-life examples and interdisciplinary connections</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std3_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std3_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 3 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std3_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std3_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 4: Differentiated Instruction */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 4: Differentiated Instruction</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate challenges and supports each student's learning by providing appropriate content and developing skills which address individual learning differences.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Differentiates instructional content, process, product, & learning environment to meet individual developmental needs</li>
+                                            <li>Uses flexible grouping strategies to encourage peer interaction</li>
+                                            <li>Demonstrates high learning expectations for all students</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std4_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std4_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 4 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std4_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std4_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Continuing with remaining instruction standards... */}
+                                {/* Standard 5: Assessment Strategies */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 5: Assessment Strategies</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate systematically chooses a variety of diagnostic, formative, and summative assessment strategies and instruments that are valid and appropriate for the content and student population.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Uses assessment techniques that are appropriate for the developmental level of students</li>
+                                            <li>Varies and modifies assessments to determine individual student needs and progress</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std5_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std5_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 5 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std5_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std5_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 6: Assessment Uses */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 6: Assessment Uses</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate systematically gathers, analyzes, and uses relevant data to measure student progress, to inform instructional content and delivery methods, and to provide timely and constructive feedback to both students and parents.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Provides constructive and frequent feedback to students on their progress toward their learning goals</li>
+                                            <li>Teaches students how to self-assess and to use metacognitive strategies in support of lifelong learning</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std6_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std6_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 6 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std6_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std6_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 7: Positive Learning Environment */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 7: Positive Learning Environment</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate provides a well-managed, safe, and orderly environment that is conducive to learning and encourages respect for all.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Responds to disruptions in a timely, appropriate manner</li>
+                                            <li>Establishes clear expectations for classroom rules, routines, and procedures</li>
+                                            <li>Models caring, fairness, respect, and enthusiasm for learning</li>
+                                            <li>Promotes a climate of trust and teamwork within the classroom</li>
+                                            <li>Promotes respect for and understanding of students' diversity</li>
+                                            <li>Actively listens and pays attention to students' needs and responses</li>
+                                            <li>Arranges the classroom materials and resources to facilitate group and individual activities</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std7_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std7_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 7 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std7_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std7_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 8: Academically Challenging Environment */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 8: Academically Challenging Environment</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate creates a student-centered, academic environment in which teaching and learning occur at high levels and students are self-directed learners.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Maximizes instructional time</li>
+                                            <li>Conveys the message that mistakes should be embraced as a valuable part of learning</li>
+                                            <li>Encourages productivity by providing students with appropriately challenging material</li>
+                                            <li>Provides transitions that minimize loss of instructional time</li>
+                                            <li>Provides academic rigor, encourages critical and creative thinking</li>
+                                            <li>Encourages students to explore new ideas and take academic risks</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std8_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std8_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 8 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std8_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std8_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 9: Professionalism */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 9: Professionalism</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate exhibits a commitment to professional ethics and the school's mission, participates in professional growth opportunities to support student learning, and contributes to the profession.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Maintains professional demeanor and behavior</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std9_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std9_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 9 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std9_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std9_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 10: Communication */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 10: Communication</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate communicates effectively with students, parents or guardians, district and school personnel, and other stakeholders in ways that enhance student learning.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Uses verbal and non-verbal communication techniques to foster positive interactions</li>
+                                            <li>Uses precise language, correct vocabulary, and grammar</li>
+                                            <li>Explains directions, concepts, and lesson content in a logical, sequential manner</li>
+                                            <li>Creates a climate of openness for parents, students, and other school professionals</li>
+                                            <li>Listens and responds with cultural awareness, empathy, and understanding</li>
+                                            <li>Uses modes of communication that are appropriate for a given situation</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std10_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std10_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 10 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std10_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std10_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 11: Technology */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 11: Technology</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate demonstrates technology proficiency, technology integration, and competency in blended/online learning during field and clinical experiences.</p>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std11_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std11_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 11 (include evidence for all substandards 11A-11C) <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std11_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std11_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11A: Technology Proficiency</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate explores and uses a variety of current and emerging technologies to support learning.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Uses a variety of devices, apps, software, and the Internet in the classroom</li>
+                                                <li>Troubleshoots and solves minor tech issues (or accesses support)</li>
+                                                <li>Answers technology-related questions from learners in the classroom</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.instruction_std11a}
+                                            onChange={handleInputChange}
+                                            field="instruction_std11a"
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11B: Technology Integration</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate demonstrates the ability to integrate technology into standards-based teaching, learning, and assessment.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Facilitates learner use of technology for critical thinking, problem solving, creativity</li>
+                                                <li>Uses technology to facilitate communication and collaboration</li>
+                                                <li>Uses technology to personalize learning around learner strengths and needs</li>
+                                                <li>Uses technology to implement assessments and track student performance</li>
+                                                <li>Manages the use of technology, ensures safe, legal, and ethical use</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.instruction_std11b}
+                                            onChange={handleInputChange}
+                                            field="instruction_std11b"
+                                        />
+                                    </div>
+
+                                    <div style={{marginTop: '1.5rem'}}>
+                                        <h4 style={{marginBottom: '1rem'}}>Standard 11C: Blended/Online Learning</h4>
+                                        <p style={{marginBottom: '0.75rem', fontSize: '0.9rem'}}>Candidate demonstrates the specialized knowledge and skills necessary for teaching and learning in a blended/online learning environment.</p>
+                                        <div className="performance-indicators">
+                                            <h4>Performance Indicators at Level 3:</h4>
+                                            <ul>
+                                                <li>Develops or curates online content and instruction for students</li>
+                                                <li>Facilitates student learning both face-to-face and online</li>
+                                                <li>Delivers content through a learning management system or online platform</li>
+                                                <li>Leverages technology tools so students can learn anywhere, anytime</li>
+                                            </ul>
+                                        </div>
+                                        <EvidenceOptions 
+                                            value={formData.instruction_std11c}
+                                            onChange={handleInputChange}
+                                            field="instruction_std11c"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 12: Literacy Support Services and Intervention */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 12: Literacy Support Services and Intervention</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate systematically gathers, analyzes, and uses relevant data to measure student progress, to inform instructional content and delivery methods, and to provide timely and constructive feedback to both students and parents.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Uses diagnostic assessment data to develop learning goals for students</li>
+                                            <li>Plans a variety of formal and informal assessments aligned with instructional results</li>
+                                            <li>Uses assessment tools for both formative and summative purposes</li>
+                                            <li>Systematically analyzes and uses data to measure student progress and design appropriate interventions</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std12_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std12_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 12 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std12_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std12_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Standard 13: Disciplinary Literacy */}
+                                <div style={{marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)'}}>
+                                    <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Standard 13: Disciplinary Literacy</h3>
+                                    <p style={{marginBottom: '1rem'}}>The teacher candidate demonstrates skill in integrating a range of content area literacy strategies into specific disciplinary subject areas, including academic vocabulary, writing, and interpretation of informational text.</p>
+                                    
+                                    <div className="performance-indicators">
+                                        <h4>Performance Indicators (not a checklist):</h4>
+                                        <ul>
+                                            <li>Integrates a range of content area literacy strategies into specific disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates academic vocabulary in disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates writing strategies into disciplinary subject areas</li>
+                                            <li>Explicitly teaches and integrates evidence-based strategies for interpreting informational text</li>
+                                        </ul>
+                                    </div>
+
+                                    <RatingScale 
+                                        value={formData.instruction_std13_rating}
+                                        onChange={handleInputChange}
+                                        field="instruction_std13_rating"
+                                    />
+
+                                    <div className="form-group">
+                                        <label className="form-label">Evidence for Standard 13 <span className="required">*</span></label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={formData.instruction_std13_evidence}
+                                            onChange={(e) => handleInputChange('instruction_std13_evidence', e.target.value)}
+                                            placeholder="Provide specific evidence observed..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {currentSection === 3 && (
+                        <div className="form-card">
+                            <h2 className="section-title">Part III: Observation Notes</h2>
+                            
+                            <div className="alert alert-info">
+                                <span>📝</span>
+                                <div>
+                                    Record your observations and notes from the observation and post-conference reflection. 
+                                    You can type directly here or note "See attached" if you have handwritten notes.
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Assessor's Evidence/Notes from Observation and Post-Conference <span className="required">*</span></label>
+                                <p className="help-text">
+                                    List observed evidence. You can also write "See attached" if notes were recorded on other pages 
+                                    (attach additional pages to D2L and Anthology submissions).
+                                </p>
+                                <textarea 
+                                    className="form-textarea"
+                                    style={{minHeight: '300px'}}
+                                    value={formData.observationNotes}
+                                    onChange={(e) => handleInputChange('observationNotes', e.target.value)}
+                                    placeholder="Type your observation notes here, including specific examples, strengths, areas for growth, and post-conference discussion points..."
+                                />
+                            </div>
+
+                            <div style={{marginTop: '2rem', padding: '1.5rem', background: 'rgba(22, 163, 74, 0.05)', borderRadius: '8px', borderLeft: '4px solid var(--success)'}}>
+                                <h3 style={{color: 'var(--primary)', marginBottom: '1rem'}}>Form Summary</h3>
+                                <div className="summary-grid">
+                                    <div className="summary-item">
+                                        <strong>Candidate</strong>
+                                        <span>{formData.candidateName || 'Not provided'}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <strong>Date</strong>
+                                        <span>{formData.observationDate || 'Not provided'}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <strong>YCE Level</strong>
+                                        <span>{formData.yceLevel || 'Not provided'}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <strong>Observation #</strong>
+                                        <span>{formData.observationNumber || 'Not provided'}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <strong>Subject</strong>
+                                        <span>{formData.subject || 'Not provided'}</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <strong>School</strong>
+                                        <span>{formData.school || 'Not provided'}</span>
+                                    </div>
+                                </div>
+
+                                <div style={{marginTop: '1.5rem'}}>
+                                    <strong style={{display: 'block', marginBottom: '0.5rem'}}>Completion Status:</strong>
+                                    <div style={{fontSize: '2rem', fontWeight: 'bold', color: 'var(--accent)'}}>
+                                        {calculateProgress()}% Complete
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="alert alert-success" style={{marginTop: '2rem'}}>
+                                <span>✓</span>
+                                <div>
+                                    <strong>Ready to Generate Report?</strong><br/>
+                                    Click "Generate HTML Report" to create a professional formatted report in a new window. 
+                                    You can print it or save as PDF (Ctrl+P / Cmd+P). Or download JSON data for backup.
+                                </div>
+                            </div>
+
+                            <div className="button-group" style={{marginTop: '2rem'}}>
+                                <button 
+                                    className="btn btn-success"
+                                    onClick={generateHTMLReport}
+                                    style={{fontSize: '1.1rem', padding: '1rem 2.5rem'}}
+                                >
+                                    📄 Generate HTML Report
+                                </button>
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={handleSubmit}
+                                >
+                                    💾 Download JSON Backup
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="navigation">
+                        <button 
+                            className="btn btn-secondary"
+                            onClick={prevSection}
+                            disabled={currentSection === 0}
+                            style={{opacity: currentSection === 0 ? 0.5 : 1}}
+                        >
+                            ← Previous
+                        </button>
+                        
+                        {currentSection < sections.length - 1 ? (
+                            <button 
+                                className="btn btn-primary"
+                                onClick={nextSection}
+                            >
+                                Next →
+                            </button>
+                        ) : (
+                            <button 
+                                className="btn btn-success"
+                                onClick={generateHTMLReport}
+                            >
+                                Complete & Generate Report
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ObservationForm />, document.getElementById('root'));
+    </script>
+</body>
+</html>
